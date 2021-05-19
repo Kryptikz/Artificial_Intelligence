@@ -10,7 +10,7 @@ public class TestNetwork {
 		 * network trained to test deciding which number is bigger or smaller
 		 */
 		int[] layers = new int[] {2,12,7,2};
-		Network n = new Network(layers, 0.05);
+		Network n = new Network(layers, 0.05,new Sigmoid());
 		long startTime = System.nanoTime();
 		int numBackProps = 1000000;
 		for(int i=0;i<numBackProps;i++) {
