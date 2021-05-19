@@ -29,7 +29,7 @@ public class MNIST_Test_2 {
             e.printStackTrace();
         }
         int numRead;
-        Network n = new Network(new int[] {784, 32, 10},0.02);
+        Network n = new Network(new int[] {784, 263, 89, 30, 10},0.02, new Sigmoid());
         int numBackProps = 0;
         int numCorrect = 0;
         int numTests = 0;
@@ -40,7 +40,6 @@ public class MNIST_Test_2 {
                 for(int i = 0; i < numRead/784; i++){
                 	DoubleMatrix xMat = new DoubleMatrix(784,1);
                     int xMatInc = 0;
-                	int[][] image = new int[28][28];
                     for(int x = 0; x < 28; x++){
                         for(int y = 0; y < 28; y++){
                         	xMat.put(xMatInc,0,Byte.toUnsignedInt(buffer[count]));
@@ -59,11 +58,13 @@ public class MNIST_Test_2 {
 	                    if (netCorrect) {
 	                    	numCorrect++;
 	                    }
-	                    double percentCorrect = (double)numCorrect/(double)numTests;
-	                    System.out.println("Actual: " + actual + " Network Output: " + netGuess + " Correct: " + netCorrect + " Percent Correct: " + (100*percentCorrect) + "%");
+	                    //double percentCorrect = (double)numCorrect/(double)numTests;
+	                    //System.out.println("Actual: " + actual + " Network Output: " + netGuess + " Correct: " + netCorrect + " Percent Correct: " + (100*percentCorrect) + "%");
                     }
                     n.backProp(xMat, yMat);
                     if (numBackProps%1000==0) {
+                    	double percentCorrect = (double)numCorrect/(double)numTests;
+                    	System.out.println("Percent Correct: "+100*percentCorrect);
                     	numCorrect = 0;
                     	numTests = 0;
                     }
@@ -122,11 +123,14 @@ public class MNIST_Test_2 {
             catch(Exception e) {
             	e.printStackTrace();
             }
+            img_in.close();
+            label_in.close();
             
         }
         catch(Exception e){
             e.printStackTrace();
         }   
+        
     }
 	private static int getNetworkPrediction(DoubleMatrix y) { 
 		double largest = y.get(0,0);
