@@ -69,6 +69,5 @@ public class TestNetwork {
 			System.out.println("\n" + y);
 		}
 		sc.close();
-		
 	}
 }
