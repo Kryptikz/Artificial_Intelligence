@@ -82,7 +82,7 @@ public class MNIST_Test_2 {
             frame.add(screen);
             Mouse mouse = new Mouse(screen);
             frame.addMouseListener(mouse);
-            frame.setBounds(0,0,1000,1000);
+            frame.setBounds(0,0,570,700);
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.setVisible(true);
             pictures = new File("test_images.bruh");
