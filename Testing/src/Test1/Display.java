@@ -28,7 +28,12 @@ public class Display extends JComponent{
         g.setFont(text);
         for(int x = 0; x < image.length; x++){
             for(int y = 0; y < image[0].length; y++){
-                g.setColor(new Color(image[x][y], image[x][y], image[x][y]));
+            	if(image[x][y] > 50) {
+            		g.setColor(new Color(image[x][y], image[x][y], image[x][y]));
+            	}
+            	else {
+            		g.setColor(Color.black);
+            	}
                 g.fillRect(x*box_size, y*box_size, box_size, box_size);
             }
         }

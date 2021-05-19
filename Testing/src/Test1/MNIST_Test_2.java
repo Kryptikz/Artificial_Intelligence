@@ -12,6 +12,7 @@ public class MNIST_Test_2 {
         InputStream label_in = null;
         File pictures = new File("images.bruh");
         File labels = new File("labels.bruh");
+        int training_rate_halfed = 1;
         try{
             img_in = new FileInputStream(pictures);
             label_in = new FileInputStream(labels);
@@ -42,7 +43,12 @@ public class MNIST_Test_2 {
                     int xMatInc = 0;
                     for(int x = 0; x < 28; x++){
                         for(int y = 0; y < 28; y++){
-                        	xMat.put(xMatInc,0,Byte.toUnsignedInt(buffer[count]));
+                        	if(Byte.toUnsignedInt(buffer[count]) > 50) {
+                        		xMat.put(xMatInc,0,1);
+                        	}
+                        	else {
+                        		xMat.put(xMatInc,0,0);
+                        	}
                             xMatInc++;
                             count++;
                         }
@@ -58,13 +64,19 @@ public class MNIST_Test_2 {
 	                    if (netCorrect) {
 	                    	numCorrect++;
 	                    }
-	                    //double percentCorrect = (double)numCorrect/(double)numTests;
-	                    //System.out.println("Actual: " + actual + " Network Output: " + netGuess + " Correct: " + netCorrect + " Percent Correct: " + (100*percentCorrect) + "%");
                     }
                     n.backProp(xMat, yMat);
                     if (numBackProps%1000==0) {
                     	double percentCorrect = (double)numCorrect/(double)numTests;
                     	System.out.println("Percent Correct: "+100*percentCorrect);
+                    	if(training_rate_halfed < 1 && percentCorrect > 68) {
+                    		n.setLearningRate(0.01);
+                    		training_rate_halfed = 1;
+                    	}
+                    	else if(training_rate_halfed < 2 && percentCorrect > 80){
+                    		n.setLearningRate(0.005);
+                    		training_rate_halfed = 2;
+                    	}
                     	numCorrect = 0;
                     	numTests = 0;
                     }
@@ -104,7 +116,12 @@ public class MNIST_Test_2 {
                         for(int x = 0; x < 28; x++){
                             for(int y = 0; y < 28; y++){
                                 image[y][x] = Byte.toUnsignedInt(buffer[count]);
-                                xMat.put(xMatInc,0,Byte.toUnsignedInt(buffer[count]));
+                                if(Byte.toUnsignedInt(buffer[count]) > 50) {
+                            		xMat.put(xMatInc,0,1);
+                            	}
+                            	else {
+                            		xMat.put(xMatInc,0,0);
+                            	}
                                 xMatInc++;
                                 count++;
                             }
