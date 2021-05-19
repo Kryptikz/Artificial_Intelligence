@@ -78,7 +78,10 @@ public class MNIST_Test_2 {
             
             JFrame frame = new JFrame("images");
             Display screen = new Display();
+            
             frame.add(screen);
+            Mouse mouse = new Mouse(screen);
+            frame.addMouseListener(mouse);
             frame.setBounds(0,0,1000,1000);
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.setVisible(true);
@@ -107,9 +110,12 @@ public class MNIST_Test_2 {
                         }
                         DoubleMatrix result = n.feedForward(xMat);
                         int netGuess = getNetworkPrediction(result);
-                        screen.update_image(image, Byte.toUnsignedInt(buffer_label[i]));
+                        screen.update_image(image, Byte.toUnsignedInt(buffer_label[i]), netGuess);
                         screen.draw();
-                        Thread.sleep(500);
+                        while(screen.pause == true) {
+                        	Thread.sleep(1);
+                        }
+                        screen.pause = true;
                     }
                 }
             }
