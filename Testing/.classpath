@@ -6,6 +6,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/Tristan/Downloads/jblas-1.2.4.jar"/>
+	<classpathentry kind="lib" path="jblas-1.2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
