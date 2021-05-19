@@ -28,7 +28,7 @@ public class MNIST_Test {
             e.printStackTrace();
         }
         int numRead;
-        Network n = new Network(new int[] {784,32,10},0.01);
+        Network n = new Network(new int[] {784,128,32,10},0.02);
         int numBackProps = 0;
         int numCorrect = 0;
         int numTests = 0;

@@ -94,13 +94,19 @@ public class MNIST_Test_2 {
                     label_in.read(buffer_label);
                     int count = 0;
                     for(int i = 0; i < numRead/784; i++){
+                    	DoubleMatrix xMat = new DoubleMatrix(784,1);
+                        int xMatInc = 0;
                         int[][] image = new int[28][28];
                         for(int x = 0; x < 28; x++){
                             for(int y = 0; y < 28; y++){
                                 image[y][x] = Byte.toUnsignedInt(buffer[count]);
+                                xMat.put(xMatInc,0,Byte.toUnsignedInt(buffer[count]));
+                                xMatInc++;
                                 count++;
                             }
                         }
+                        DoubleMatrix result = n.feedForward(xMat);
+                        int netGuess = getNetworkPrediction(result);
                         screen.update_image(image, Byte.toUnsignedInt(buffer_label[i]));
                         screen.draw();
                         Thread.sleep(500);
