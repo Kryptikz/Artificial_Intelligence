@@ -56,6 +56,12 @@ public class Network {
 			bMatrixArr[i] = bMatrixArr[i].sub(layerError[i].mul(lRate));
 		}
 	}
+	public double getLearningRate() {
+		return lRate;
+	}
+	public void setLearningRate(double lRate) {
+		this.lRate = lRate;
+	}
 	protected static void randomizeMatrix(DoubleMatrix m, double low, double high) {
 		for(int r=0;r<m.getRows();r++) {
 			for(int c=0;c<m.getColumns();c++) {
