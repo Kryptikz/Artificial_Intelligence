@@ -1,0 +1,54 @@
+package Test1;
+
+import org.jblas.*;
+
+public class TestNetwork {
+	public static void main(String[] args) {
+		/*network has 2 inputs, each being a different number
+		 * network has 2 outputs, output 0 says input 0 is bigger and vice versa
+		 * network trained to test deciding which number is bigger or smaller
+		 */
+		int[] layers = new int[] {2,3,2};
+		Network n = new Network(layers, 0.01);
+		for(int i=0;i<500;i++) {
+			DoubleMatrix x = DoubleMatrix.rand(2,1);
+			DoubleMatrix y = new DoubleMatrix(2,1);
+			if (x.get(1,0) > x.get(0,0)) {
+				y.put(1,0,1);
+			} else {
+				y.put(0,0,1);
+			}
+			n.backProp(x, y);
+		}
+		int numRight = 0;
+		int numTests = 10000;
+		for(int i=0;i<numTests;i++) {
+			DoubleMatrix x = DoubleMatrix.rand(2,1);
+			DoubleMatrix y = new DoubleMatrix(2,1);
+			int correct = 0;
+			if (x.get(1,0) > x.get(0,0)) {
+				y.put(1,0,1);
+				correct = 1;
+			} else {
+				y.put(0,0,1);
+			}
+			DoubleMatrix result = n.feedForward(x);
+			if (result.get(0,0) > result.get(1,0)) {
+				if (correct == 0) {
+					//System.out.println("Correct");
+					numRight++;
+				} else {
+					//System.out.println("Incorrect");
+				}
+			} else {
+				if (correct == 1) {
+					//System.out.println("Correct");
+					numRight++;
+				} else {
+					//System.out.println("Incorrect");
+				}
+			}
+		}
+		System.out.println("Percent Correct: " + (double)numRight/(double)numTests);
+	}
+}

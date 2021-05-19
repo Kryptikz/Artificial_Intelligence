@@ -1,0 +1,27 @@
+package Test1;
+
+import org.jblas.*;
+
+public class Network {
+	protected DoubleMatrix[] wMatrixArr;
+	protected DoubleMatrix[] bMatrixArr;
+	protected String activationFunc = "sigmoid";
+	
+	public Network(int[] layers) {
+		wMatrixArr = new DoubleMatrix[layers.length-1];
+		for(int i=0;i<layers.length-1;i++) {
+			DoubleMatrix tempWMatrix = new DoubleMatrix(layers[i+1],layers[i]);
+			DoubleMatrix tempBMatrix = new DoubleMatrix(layers[i+1],1);
+			wMatrixArr[i] = tempWMatrix; 
+			bMatrixArr[i] = tempBMatrix;
+		}
+	}	
+	
+	protected static void randomizeMatrix(DoubleMatrix m, double low, double high) {
+		for(int r=0;r<m.getRows();r++) {
+			for(int c=0;c<m.getColumns();c++) {
+				m.put(r,c,low+(Math.random()*(high-low)));
+			}
+		}
+	}
+}

@@ -1,0 +1,26 @@
+package Test1;
+
+import org.jblas.*;
+
+public class TestNetwork {
+	public static void main(String[] args) {
+		/*network has 2 inputs, each being a different number
+		 * network has 2 outputs, output 0 says input 0 is bigger and vice versa
+		 * network trained to test deciding which number is bigger or smaller
+		 */
+		int[] layers = new int[] {2,3,2};
+		Network n = new Network(layers, 0.05);
+		for(int i=0;i<1000;i++) {
+			DoubleMatrix x = DoubleMatrix.rand(2,1);
+			DoubleMatrix y = new DoubleMatrix(2,1);
+			if (x.get(1,0) > x.get(0,0)) {
+				y.put(1,0,1);
+			} else {
+				y.put(0,0,1);
+			}
+			
+			
+		}
+		
+	}
+}
