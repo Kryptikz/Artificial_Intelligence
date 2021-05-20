@@ -29,7 +29,7 @@ public abstract class ActivationFunction {
 		}
 		return y;
 	}
-	public static boolean validateInputMatrix(DoubleMatrix x) {
+	private static boolean validateInputMatrix(DoubleMatrix x) {
 		if (x.getColumns() != 1) {
 			System.err.println("WRONG NUMBER OF COLUMNS IN SIGMOID MATRIX COMPUTATION, SHOULD BE 1, HAS " + x.getColumns());
 			return false;

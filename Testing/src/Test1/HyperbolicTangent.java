@@ -5,10 +5,12 @@ public class HyperbolicTangent extends ActivationFunction {
 		super("hyperbolicTangent");
 	}
 	public double eval(double x) {
-		return (Math.exp(2*x)-1)/(Math.exp(2*x)+1);
+		double epx = Math.exp(x);
+		double enx = Math.exp(-x);
+		return (epx-enx)/(epx+enx);
 	}
 	public double evalPrime(double x) {
-		double temp = eval(x);
-		return temp*(1-temp);
+		double htx = eval(x);
+		return 1-(htx*htx);
 	}
 }
