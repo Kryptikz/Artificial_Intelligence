@@ -13,8 +13,8 @@ public class MNIST_Test {
 	public static void main(String[] args){
         InputStream img_in = null;
         InputStream label_in = null;
-        File pictures = new File("images.bruh");
-        File labels = new File("labels.bruh");
+        File pictures = new File("data/MNIST/images.bruh");
+        File labels = new File("data/MNIST/labels.bruh");
         int training_rate_halfed = 1;
         try{
             img_in = new FileInputStream(pictures);
@@ -102,8 +102,8 @@ public class MNIST_Test {
             frame.setBounds(0,0,570,700);
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.setVisible(true);
-            pictures = new File("test_images.bruh");
-            labels = new File("test_labels.bruh");
+            pictures = new File("data/MNIST/test_images.bruh");
+            labels = new File("data/MNIST/test_labels.bruh");
             img_in = new FileInputStream(pictures);
             label_in = new FileInputStream(labels);
             try {
