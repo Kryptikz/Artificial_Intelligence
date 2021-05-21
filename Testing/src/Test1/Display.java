@@ -38,7 +38,7 @@ public class Display extends JComponent{
             }
         }
         g.setColor(Color.BLACK);
-        g.drawString("Label: " + label,50, 600);
-        g.drawString("Network guess: " + guess, 50, 650);
+        g.drawString("Label: " + EMNIST_TEST.getCharFromInt(label),50, 600);
+        g.drawString("Network guess: " + EMNIST_TEST.getCharFromInt(guess), 50, 650);
     }
 }
