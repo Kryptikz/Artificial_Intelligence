@@ -3,6 +3,7 @@ package Test1;
 public class GPUMath_test {
 	public static void main(String[] args) {
 		GPUMath gpu = new GPUMath();
+		/*
 		int arrSize = 2000000;
 		int[] arrOne = new int[arrSize];
 		int[] arrTwo = new int[arrSize];
@@ -13,7 +14,7 @@ public class GPUMath_test {
 		}
 		long start = System.nanoTime();
 		for(int i = 0; i < arrSize; i++) {
-			arrRes[i] = arrOne[i] + arrTwo[i];
+			arrRes[i] = arrOne[i] * arrTwo[i];
 		}
 		long end = System.nanoTime();
 		System.out.println("CPU Time taken: " + (end-start));
@@ -21,5 +22,16 @@ public class GPUMath_test {
 	    arrRes = gpu.addMatrices(arrOne, arrTwo);
 	    end = System.nanoTime();
 	    System.out.println("GPU Time taken with overhead: " + (end-start));
+	    */
+		double[][] arrOne = new double[][] {{1, 2, 3}, {4, 5, 6}};
+		double[][] arrTwo = new double[][] {{7, 8}, {9, 10}, {11, 12}};
+		int M = arrOne.length;
+		int N = arrTwo[0].length;
+		int K = arrTwo.length;
+		double[] result = gpu.dotProduct(M, N, K, arrOne, arrTwo);
+		for(int i = 0; i < result.length; i++) {
+			System.out.print(result[i]+ " ");
+		}
+	    gpu.close();
 	}
 }
