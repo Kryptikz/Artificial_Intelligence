@@ -78,7 +78,7 @@ public class Network {
 			layerError[i] = gpu.mmulGPU(wMatrixArr[i+1].transpose(),layerError[i+1]).mul(af.evalPrimeMatrix(nodes[i]));
 		}
 		//perform gradient descent
-		System.out.printf("wMatrix size: (%d,%d) solution size: (%d,%d)",wMatrixArr[0].getRows(),wMatrixArr[0].getColumns(),(gpu.mmulGPU(layerError[0],x.transpose()).mul(lRate)).getRows(),(gpu.mmulGPU(layerError[0],x.transpose()).mul(lRate)).getColumns());
+		//System.out.printf("wMatrix size: (%d,%d) solution size: (%d,%d)",wMatrixArr[0].getRows(),wMatrixArr[0].getColumns(),(gpu.mmulGPU(layerError[0],x.transpose()).mul(lRate)).getRows(),(gpu.mmulGPU(layerError[0],x.transpose()).mul(lRate)).getColumns());
 		wMatrixArr[0] = wMatrixArr[0].sub(gpu.mmulGPU(layerError[0],x.transpose()).mul(lRate));
 		bMatrixArr[0] = bMatrixArr[0].sub(layerError[0].mul(lRate));
 		for(int i=1;i<wMatrixArr.length;i++) {

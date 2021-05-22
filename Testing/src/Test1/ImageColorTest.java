@@ -23,9 +23,10 @@ public class ImageColorTest {
         frame.add(display);
         display.setVisible(true);
          
-		int[] imageResizeDims = new int[] {64,64};
-		int[] netLayers = new int[] {imageResizeDims[0]*imageResizeDims[1],2048,1024,3*imageResizeDims[0]*imageResizeDims[1]};
-		Network n = new Network(netLayers,0.01,new Sigmoid());
+		int[] imageResizeDims = new int[] {81,81};
+		//int[] netLayers = new int[] {imageResizeDims[0]*imageResizeDims[1],128,32,3*imageResizeDims[0]*imageResizeDims[1]};
+		int[] netLayers = new int[] {imageResizeDims[0]*imageResizeDims[1],5196,5196,3*imageResizeDims[0]*imageResizeDims[1]};
+		Network n = new Network(netLayers,0.1,new Sigmoid());
 		File[] bwImages = bw_Images.listFiles();
 		//for(File f : bwImages) {
 		//	System.out.println(f);
@@ -58,7 +59,7 @@ public class ImageColorTest {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			n.backProp(netIn, netOutIdeal);
+			n.backPropGPU(netIn, netOutIdeal);
 			try {
 				Thread.sleep(100);
 			} catch (Exception e) {

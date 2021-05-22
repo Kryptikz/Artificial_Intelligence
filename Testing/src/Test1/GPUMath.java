@@ -27,7 +27,7 @@ public class GPUMath {
     	    + "C[globalCol*M + globalRow] = value;"
     	    + "}";
     public GPUMath() {
-    	final long deviceType = CL_DEVICE_TYPE_DEFAULT;
+    	final long deviceType = CL_DEVICE_TYPE_GPU;
     	final int platformIndex = 0;
     	final int deviceIndex = 0;
     		
@@ -49,7 +49,10 @@ public class GPUMath {
         int numDevices = numDevicesArray[0];
         devices = new cl_device_id[numDevices]; //array of the GPUs, will be changed for the bitcoin miner
         clGetDeviceIDs(platform, deviceType, numDevices, devices, null);
+        
         cl_device_id device = devices[deviceIndex];
+        //System.out.println(device.);
+        //clGetDeviceInfo(device, param_name, param_value_size, param_value, param_value_size_ret)
         
         context = clCreateContext(contextProperties, 1, new cl_device_id[]{device}, null, null, null); //context for a specific GPU
         
@@ -126,8 +129,8 @@ public class GPUMath {
         clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, Sizeof.cl_long, Pointer.to(new long[] {time_end}), null);
 
         double nanoSeconds = time_end-time_start;
-        System.out.println(time_start);
-        System.out.printf("OpenCl Execution time is: %f milliseconds \n",(double)nanoSeconds / 1000000.0);
+        //System.out.println(time_start);
+        //System.out.printf("OpenCl Execution time is: %f milliseconds \n",(double)nanoSeconds / 1000000.0);
         
         
         long end = System.nanoTime();
@@ -138,7 +141,7 @@ public class GPUMath {
         
         double[][] ret = unsquishMatrix(C, N);
         
-	    System.out.println("GPU Time taken without overhead: " + (double)(end-start)/(long)(Math.pow(10,9)));
+	    //System.out.println("GPU Time taken without overhead: " + (double)(end-start)/(long)(Math.pow(10,9)));
         return ret;
     }
     
@@ -172,7 +175,7 @@ public class GPUMath {
         long start = System.nanoTime();
         clEnqueueNDRangeKernel(commandQueue, kernel, 1, null, global_work_size, null, 0, null, null);
         long end = System.nanoTime();
-        System.out.println("GPU without overhead: "+(end- start));
+        //System.out.println("GPU without overhead: "+(end- start));
         //reads the data
         clEnqueueReadBuffer(commandQueue, rMem, CL_TRUE, 0,buf_length * Sizeof.cl_int, srcR, 0, null, null);
         
