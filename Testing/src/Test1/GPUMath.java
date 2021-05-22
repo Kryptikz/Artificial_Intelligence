@@ -6,6 +6,8 @@ public class GPUMath {
 	cl_context context;
 	cl_device_id devices[];
 	cl_command_queue commandQueue;
+	cl_kernel multKernel;
+	cl_program multProgram;
     private String addProgram = 
 			"__kernel void " + 
 		    "addKernel(__global const int *a, __global const int *b, __global int *c){" + 
@@ -55,6 +57,12 @@ public class GPUMath {
         cl_queue_properties properties = new cl_queue_properties();
         //commandQueue = clCreateCommandQueueWithProperties(context, devices[0], properties, null);
         commandQueue = clCreateCommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE, null);
+        
+        //create the program and kernels
+        String[] matMulStr = new String[] { matMul };
+        cl_program program = clCreateProgramWithSource(context, 1, matMulStr, null, null);
+        clBuildProgram(program, 0, null, null, null, null);
+        multKernel = clCreateKernel(program, "matMulKernel", null);
     }
 	//[row][col] 
     //m = num row in A 
@@ -68,30 +76,13 @@ public class GPUMath {
     	long buf_length = M * N;
     	long start = System.nanoTime();
     	
-    	
-    	
     	cl_mem memA = clCreateBuffer(context, CL_MEM_READ_ONLY, Sizeof.cl_double * M * K, null, null);
         cl_mem memB = clCreateBuffer(context, CL_MEM_READ_ONLY, Sizeof.cl_double * K * N, null, null);
         cl_mem memR = clCreateBuffer(context, CL_MEM_READ_WRITE, Sizeof.cl_double * M * N, null, null);
         
+        double[] aConverted = squishMatrix(A);
+        double[] bConverted = squishMatrix(B);
         
-        
-        double[] aConverted = new double[A.length*A[0].length];
-        double[] bConverted = new double[B.length*B[0].length];
-        int incr = 0;
-        for(int r=0;r<A.length;r++) {
-        	for(int c=0;c<A[0].length;c++) {
-        		aConverted[incr]=A[r][c];
-        		incr++;
-        	}
-        }
-        incr = 0;
-        for(int r=0;r<B.length;r++) {
-        	for(int c=0;c<B[0].length;c++) {
-        		bConverted[incr]=B[r][c];
-        		incr++;
-        	}
-        }
         //long end = System.nanoTime();
         //System.out.println("Flatten Time: " + (double)(end-start)/(long)(Math.pow(10,9)));
         
@@ -101,26 +92,16 @@ public class GPUMath {
         clEnqueueWriteBuffer(commandQueue, memB, CL_TRUE, 0, Sizeof.cl_double * K * N, Pointer.to(bConverted), 0, null, null);
         clEnqueueWriteBuffer(commandQueue, memR, CL_TRUE, 0, Sizeof.cl_double * M * N, Pointer.to(C), 0, null, null);
         
-       
-        
-        String[] matMulStr = new String[] { matMul };
-        
-        cl_program program = clCreateProgramWithSource(context, 1, matMulStr, null, null);
-        clBuildProgram(program, 0, null, null, null, null);
-        cl_kernel kernel = clCreateKernel(program, "matMulKernel", null);
-        
-        
-        
         int[] in1 = new int[] {M};
         int[] in2 = new int[] {N};
         int[] in3 = new int[] {K};
         
-        clSetKernelArg(kernel, 0, Sizeof.cl_int, Pointer.to(in1));
-        clSetKernelArg(kernel, 1, Sizeof.cl_int, Pointer.to(in2));
-        clSetKernelArg(kernel, 2, Sizeof.cl_int, Pointer.to(in3));
-        clSetKernelArg(kernel, 3, Sizeof.cl_mem, Pointer.to(memA));
-        clSetKernelArg(kernel, 4, Sizeof.cl_mem, Pointer.to(memB));
-        clSetKernelArg(kernel, 5, Sizeof.cl_mem, Pointer.to(memR));
+        clSetKernelArg(multKernel, 0, Sizeof.cl_int, Pointer.to(in1));
+        clSetKernelArg(multKernel, 1, Sizeof.cl_int, Pointer.to(in2));
+        clSetKernelArg(multKernel, 2, Sizeof.cl_int, Pointer.to(in3));
+        clSetKernelArg(multKernel, 3, Sizeof.cl_mem, Pointer.to(memA));
+        clSetKernelArg(multKernel, 4, Sizeof.cl_mem, Pointer.to(memB));
+        clSetKernelArg(multKernel, 5, Sizeof.cl_mem, Pointer.to(memR));
         
         long global[] = new long[]{M, N};
         //long local[] = new long[]{2, 2};
@@ -129,7 +110,7 @@ public class GPUMath {
         cl_event event = new cl_event();
         
         //start = System.nanoTime();
-        clEnqueueNDRangeKernel(commandQueue, kernel, 2, null, global, local, 0, null, event);
+        clEnqueueNDRangeKernel(commandQueue, multKernel, 2, null, global, local, 0, null, event);
         
         clWaitForEvents(1,new cl_event[] {event});
         
@@ -154,17 +135,8 @@ public class GPUMath {
         clReleaseMemObject(memA);
         clReleaseMemObject(memB);
         clReleaseMemObject(memR);
-        clReleaseKernel(kernel);
-        clReleaseProgram(program);
         
-        double[][] ret = new double[N][M];
-        incr = 0;
-        for(int r=0;r<N;r++) {
-        	for(int c=0;c<M;c++) {
-        		ret[r][c] = C[incr];
-        		incr++;
-        	}
-        }
+        double[][] ret = unsquishMatrix(C, N);
         
 	    System.out.println("GPU Time taken without overhead: " + (double)(end-start)/(long)(Math.pow(10,9)));
         return ret;
@@ -212,15 +184,26 @@ public class GPUMath {
         clReleaseProgram(program);
 		return result;
 	}
+	
 	public void close() {
+		clReleaseKernel(multKernel);
 		clReleaseContext(context);
 		clReleaseCommandQueue(commandQueue);
-		
 	}
-	public static double[] squishTwoMatrices(double[][] a1) {
-		//final int numThreads = 100;
-		
-		
-		return null;
+	
+	public static double[] squishMatrix(double[][] a) {
+		double[] b = new double[a.length*a[0].length];
+		for(int i = 0; i < b.length; i++) {
+			b[i] = a[i/a[0].length][i%a[0].length];
+		}
+		return b;
 	}
+	
+	public static double[][] unsquishMatrix(double[] a, int numCol) {
+		double[][] b = new double[a.length/numCol][numCol];
+		for(int i = 0; i < a.length; i++) {
+			b[i/numCol][i%numCol] = a[i];
+		}
+		return b;
+	}	
 }

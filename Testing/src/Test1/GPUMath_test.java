@@ -28,19 +28,25 @@ public class GPUMath_test {
 		//double[][] arrOne = new double[][] {{81, 5}, {4, 5}};
 		//double[][] arrTwo = new double[][] {{7, 8}, {9, 10}};
 		
-		double[][] arrOne = new double[1000][1000];
-		double[][] arrTwo = new double[1000][1];
+		double[][] arrOne = new double[3][2];
+		double[][] arrTwo = new double[2][3];
+		System.out.println("Array one: ");
 		for(int r=0;r<arrOne.length;r++) {
 			for(int c=0;c<arrOne[0].length;c++) {
-				arrOne[r][c] = (Math.random()*10)-5;
+				arrOne[r][c] = (int)(Math.random()*5)+1;
+				System.out.print(arrOne[r][c]+ " ");
 			}
+			System.out.println("");
+			
 		}
+		System.out.println("Array two: ");
 		for(int r=0;r<arrTwo.length;r++) {
 			for(int c=0;c<arrTwo[0].length;c++) {
-				arrTwo[r][c] = (Math.random()*10)-5;
+				arrTwo[r][c] = (int)(Math.random()*5)+1;
+				System.out.print(arrTwo[r][c]+ " ");
 			}
+			System.out.println("");
 		}
-		
 		int M = arrOne.length;
 		int N = arrTwo[0].length;
 		int K = arrTwo.length;
@@ -56,12 +62,12 @@ public class GPUMath_test {
 		end = System.nanoTime();
 		System.out.println("CPU Time taken with overhead: " + (double)(end-start)/(long)(Math.pow(10,9)));
 		
-	    /*for(double[] da : result) {
+	    for(double[] da : result) {
 			for(double d : da) {
 				System.out.print(d + " ");
 			}
 			System.out.println();
-		}*/
+		}
 	    gpu.close();
 	}
 }
