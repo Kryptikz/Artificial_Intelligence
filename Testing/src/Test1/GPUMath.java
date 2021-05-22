@@ -55,7 +55,7 @@ public class GPUMath {
         for (int i=0; i<numDevices; i++)
         {
             String deviceName = getString(devices[i], CL_DEVICE_NAME);
-            System.out.println("Device "+i+" of "+numDevices+": "+deviceName);
+            System.out.println("Device "+(i+1)+" of "+numDevices+": "+deviceName);
         }
         cl_device_id device = devices[0];
         //System.out.println(getString(device, CL_DEVICE_NAME));
