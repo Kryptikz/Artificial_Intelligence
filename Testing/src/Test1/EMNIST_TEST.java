@@ -13,7 +13,7 @@ public class EMNIST_TEST {
 	public static void main(String[] args){
         InputStream img_in = null;
         InputStream label_in = null;
-        File pictures = new File("data/EMNIST/bymerge/train-images");
+        File pictures = new File("data/EMNIST/bymerge/train-images.h");
         File labels = new File("data/EMNIST/bymerge/train-labels");
         int training_rate_halfed = 1;
         try{
@@ -69,7 +69,7 @@ public class EMNIST_TEST {
 	                    	numCorrect++;
 	                    }
                     }
-                    n.backProp(xMat, yMat);
+                    n.backPropGPU(xMat, yMat);
                     if (numBackProps%1000==0) {
                     	double percentCorrect = (double)numCorrect/(double)numTests;
                     	System.out.println("Percent Correct: "+100*percentCorrect);

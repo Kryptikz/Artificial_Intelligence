@@ -1,6 +1,7 @@
 package Test1;
 import static org.jocl.CL.*;
 import org.jocl.*;
+import org.jblas.*;
 public class GPUMath {
 	cl_context context;
 	cl_device_id devices[];
@@ -19,10 +20,12 @@ public class GPUMath {
     	    + "float value = 0.0f;"
     	    + "for(int k = 0; k < K; k++){"
     	    + "   value += A[k*M + globalRow] * B[globalCol*K + k];"
+    	    + "   /*printf(\"\\nglobalRow=%d globalCol=%d M=%d N=%d K=%d m1: %f m2: %f \",globalRow,globalCol,M,N,K,A[k*M + globalRow],B[globalCol*K + k]);*/"
     	    + "}"
-    	    + "C[globalCol*M+globalRow] = value;}";
+    	    + "C[globalCol*M + globalRow] = value;"
+    	    + "}";
     public GPUMath() {
-    	final long deviceType = CL_DEVICE_TYPE_GPU;
+    	final long deviceType = CL_DEVICE_TYPE_DEFAULT;
     	final int platformIndex = 0;
     	final int deviceIndex = 0;
     		
@@ -50,42 +53,121 @@ public class GPUMath {
         
         //create command queue
         cl_queue_properties properties = new cl_queue_properties();
-        commandQueue = clCreateCommandQueueWithProperties(context, devices[0], properties, null);
+        //commandQueue = clCreateCommandQueueWithProperties(context, devices[0], properties, null);
+        commandQueue = clCreateCommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE, null);
     }
 	//[row][col] 
     //m = num row in A 
     //n = num col in B
     //k = num col in A or num row in B
-    public double[] dotProduct(final int M, final int N, final int K, double[][] A, double[][] B) {
+    public DoubleMatrix mmulGPU(DoubleMatrix A, DoubleMatrix B) {
+    	return new DoubleMatrix(dotProduct(A.getRows(),B.getColumns(),B.getRows(),B.toArray2(),A.toArray2()));
+    }
+    public double[][] dotProduct(final int M, final int N, final int K, double[][] B, double[][] A) {
+    	//COMPUTE DOT PRODUCT A TIMES B, just put matrices in correct order!!!!
     	long buf_length = M * N;
-    	cl_mem memA = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, Sizeof.cl_double * A.length * A[0].length, Pointer.to(A[0]), null);
-        cl_mem memB = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, Sizeof.cl_double * B.length * B[0].length, Pointer.to(B[0]), null);
-        cl_mem memR = clCreateBuffer(context, CL_MEM_READ_WRITE, Sizeof.cl_double * buf_length, null, null);
+    	long start = System.nanoTime();
+    	
+    	
+    	
+    	cl_mem memA = clCreateBuffer(context, CL_MEM_READ_ONLY, Sizeof.cl_double * M * K, null, null);
+        cl_mem memB = clCreateBuffer(context, CL_MEM_READ_ONLY, Sizeof.cl_double * K * N, null, null);
+        cl_mem memR = clCreateBuffer(context, CL_MEM_READ_WRITE, Sizeof.cl_double * M * N, null, null);
         
-        cl_program program = clCreateProgramWithSource(context, 1, new String[]{ matMul }, null, null);
+        
+        
+        double[] aConverted = new double[A.length*A[0].length];
+        double[] bConverted = new double[B.length*B[0].length];
+        int incr = 0;
+        for(int r=0;r<A.length;r++) {
+        	for(int c=0;c<A[0].length;c++) {
+        		aConverted[incr]=A[r][c];
+        		incr++;
+        	}
+        }
+        incr = 0;
+        for(int r=0;r<B.length;r++) {
+        	for(int c=0;c<B[0].length;c++) {
+        		bConverted[incr]=B[r][c];
+        		incr++;
+        	}
+        }
+        //long end = System.nanoTime();
+        //System.out.println("Flatten Time: " + (double)(end-start)/(long)(Math.pow(10,9)));
+        
+        double[] C = new double[M*N];
+        
+        clEnqueueWriteBuffer(commandQueue, memA, CL_TRUE, 0, Sizeof.cl_double * M * K, Pointer.to(aConverted), 0, null, null);
+        clEnqueueWriteBuffer(commandQueue, memB, CL_TRUE, 0, Sizeof.cl_double * K * N, Pointer.to(bConverted), 0, null, null);
+        clEnqueueWriteBuffer(commandQueue, memR, CL_TRUE, 0, Sizeof.cl_double * M * N, Pointer.to(C), 0, null, null);
+        
+       
+        
+        String[] matMulStr = new String[] { matMul };
+        
+        cl_program program = clCreateProgramWithSource(context, 1, matMulStr, null, null);
         clBuildProgram(program, 0, null, null, null, null);
         cl_kernel kernel = clCreateKernel(program, "matMulKernel", null);
         
-        clSetKernelArg(kernel, 0, Sizeof.cl_int, Pointer.to(new int[] {M}));
-        clSetKernelArg(kernel, 1, Sizeof.cl_int, Pointer.to(new int[] {N}));
-        clSetKernelArg(kernel, 2, Sizeof.cl_int, Pointer.to(new int[] {K}));
+        
+        
+        int[] in1 = new int[] {M};
+        int[] in2 = new int[] {N};
+        int[] in3 = new int[] {K};
+        
+        clSetKernelArg(kernel, 0, Sizeof.cl_int, Pointer.to(in1));
+        clSetKernelArg(kernel, 1, Sizeof.cl_int, Pointer.to(in2));
+        clSetKernelArg(kernel, 2, Sizeof.cl_int, Pointer.to(in3));
         clSetKernelArg(kernel, 3, Sizeof.cl_mem, Pointer.to(memA));
         clSetKernelArg(kernel, 4, Sizeof.cl_mem, Pointer.to(memB));
         clSetKernelArg(kernel, 5, Sizeof.cl_mem, Pointer.to(memR));
         
         long global[] = new long[]{M, N};
-        long local[] = new long[]{2, 2};
+        //long local[] = new long[]{2, 2};
+        long local[] = new long[] {1,1};
         
-        clEnqueueNDRangeKernel(commandQueue, kernel, 2, null, global, local, 0, null, null);
+        cl_event event = new cl_event();
         
-        double[] result = new double[(int)buf_length];
-        clEnqueueReadBuffer(commandQueue, memR, CL_TRUE, 0,buf_length * Sizeof.cl_double, Pointer.to(result), 0, null, null);
+        //start = System.nanoTime();
+        clEnqueueNDRangeKernel(commandQueue, kernel, 2, null, global, local, 0, null, event);
+        
+        clWaitForEvents(1,new cl_event[] {event});
+        
+        
+        clEnqueueReadBuffer(commandQueue, memR, CL_TRUE, 0,buf_length * Sizeof.cl_double, Pointer.to(C), 0, null, null);
+        
+        clFinish(commandQueue);
+        
+        long time_start = 0;
+        long time_end = 0;
+        //clGetEventProfilingInfo(event, param_name, param_value_size, param_value, param_value_size_ret)
+        clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, Sizeof.cl_long, Pointer.to(new long[] {time_start}), null);
+        clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, Sizeof.cl_long, Pointer.to(new long[] {time_end}), null);
+
+        double nanoSeconds = time_end-time_start;
+        System.out.println(time_start);
+        System.out.printf("OpenCl Execution time is: %f milliseconds \n",(double)nanoSeconds / 1000000.0);
+        
+        
+        long end = System.nanoTime();
+        
         clReleaseMemObject(memA);
         clReleaseMemObject(memB);
         clReleaseMemObject(memR);
         clReleaseKernel(kernel);
         clReleaseProgram(program);
-        return result;
+        
+        double[][] ret = new double[N][M];
+        incr = 0;
+        for(int r=0;r<N;r++) {
+        	for(int c=0;c<M;c++) {
+        		ret[r][c] = C[incr];
+        		incr++;
+        	}
+        }
+        
+	    System.out.println("GPU Time taken without overhead: " + (double)(end-start)/(long)(Math.pow(10,9)));
+        return ret;
     }
     
 	public int[] addMatrices(int[] A, int[] B) {
@@ -134,5 +216,11 @@ public class GPUMath {
 		clReleaseContext(context);
 		clReleaseCommandQueue(commandQueue);
 		
+	}
+	public static double[] squishTwoMatrices(double[][] a1) {
+		//final int numThreads = 100;
+		
+		
+		return null;
 	}
 }

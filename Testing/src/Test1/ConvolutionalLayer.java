@@ -12,5 +12,13 @@ public class ConvolutionalLayer {
 		this.padding = padding;
 		this.stride = stride;
 	}
+	public DoubleMatrix feedForward(DoubleMatrix x) {
+		//add padding
+		return null;
+	}
+	private DoubleMatrix padMatrix(DoubleMatrix x) {
+		//DoubleMatrix ret =
+		return null;
+	}
 	
 }
