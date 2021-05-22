@@ -27,7 +27,7 @@ public class GPUMath {
     	    + "C[globalCol*M + globalRow] = value;"
     	    + "}";
     public GPUMath() {
-    	final long deviceType = CL_DEVICE_TYPE_GPU;
+    	final long deviceType = CL_DEVICE_TYPE_ALL;
     	final int platformIndex = 0;
     	final int deviceIndex = 0;
     		
@@ -48,11 +48,20 @@ public class GPUMath {
         clGetDeviceIDs(platform, deviceType, 0, null, numDevicesArray);
         int numDevices = numDevicesArray[0];
         devices = new cl_device_id[numDevices]; //array of the GPUs, will be changed for the bitcoin miner
-        clGetDeviceIDs(platform, deviceType, numDevices, devices, null);
+        //clGetDeviceIDs(platform, deviceType, numDevices, devices, null);
         
-        cl_device_id device = devices[deviceIndex];
-        //System.out.println(device.);
-        //clGetDeviceInfo(device, param_name, param_value_size, param_value, param_value_size_ret)
+        //cl_device_id devices[] = new cl_device_id[numDevices];
+        clGetDeviceIDs(platform, deviceType, numDevices, devices, null);
+        for (int i=0; i<numDevices; i++)
+        {
+            String deviceName = getString(devices[i], CL_DEVICE_NAME);
+            System.out.println("Device "+i+" of "+numDevices+": "+deviceName);
+        }
+        cl_device_id device = devices[0];
+        //System.out.println(getString(device, CL_DEVICE_NAME));
+        /*for(char c : value) {
+        	System.out.print(c);
+        }*/
         
         context = clCreateContext(contextProperties, 1, new cl_device_id[]{device}, null, null, null); //context for a specific GPU
         
@@ -209,4 +218,22 @@ public class GPUMath {
 		}
 		return b;
 	}	
+	private static String getString(cl_platform_id platform, int paramName)
+    {
+        long size[] = new long[1];
+        clGetPlatformInfo(platform, paramName, 0, null, size);
+        byte buffer[] = new byte[(int)size[0]];
+        clGetPlatformInfo(platform, paramName, 
+            buffer.length, Pointer.to(buffer), null);
+        return new String(buffer, 0, buffer.length-1);
+    }
+	private static String getString(cl_device_id device, int paramName)
+    {
+        long size[] = new long[1];
+        clGetDeviceInfo(device, paramName, 0, null, size);
+        byte buffer[] = new byte[(int)size[0]];
+        clGetDeviceInfo(device, paramName, 
+            buffer.length, Pointer.to(buffer), null);
+        return new String(buffer, 0, buffer.length-1);
+    }
 }
