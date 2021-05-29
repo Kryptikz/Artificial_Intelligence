@@ -23,10 +23,10 @@ public class ImageColorTest {
         frame.add(display);
         display.setVisible(true);
          
-		int[] imageResizeDims = new int[] {81,81};
+		int[] imageResizeDims = new int[] {40,40};
 		//int[] netLayers = new int[] {imageResizeDims[0]*imageResizeDims[1],128,32,3*imageResizeDims[0]*imageResizeDims[1]};
-		int[] netLayers = new int[] {imageResizeDims[0]*imageResizeDims[1],5196,5196,3*imageResizeDims[0]*imageResizeDims[1]};
-		Network n = new Network(netLayers,0.1,new Sigmoid());
+		int[] netLayers = new int[] {imageResizeDims[0]*imageResizeDims[1],128,32,3*imageResizeDims[0]*imageResizeDims[1]};
+		Network n = new Network(netLayers,0.6,new Sigmoid());
 		File[] bwImages = bw_Images.listFiles();
 		//for(File f : bwImages) {
 		//	System.out.println(f);

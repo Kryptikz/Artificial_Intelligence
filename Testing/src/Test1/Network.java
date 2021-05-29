@@ -45,7 +45,8 @@ public class Network {
 		}
 		//calculate output error
 		layerError[layerError.length-1] = (activations[activations.length-1].sub(y)).mul(af.evalPrimeMatrix(nodes[nodes.length-1]));
-		//System.out.println(layerError[layerError.length-1].mean()); //prints loss
+		//System.out.println(nodes[nodes.length-1]);
+		//System.out.println(layerError[layerError.length-1]); //prints loss
 		//backward pass
 		for(int i=layerError.length-2;i>=0;i--) {
 			layerError[i] = (wMatrixArr[i+1].transpose().mmul(layerError[i+1])).mul(af.evalPrimeMatrix(nodes[i]));
@@ -53,9 +54,38 @@ public class Network {
 		//perform gradient descent
 		wMatrixArr[0] = wMatrixArr[0].sub((layerError[0].mmul(x.transpose())).mul(lRate));
 		bMatrixArr[0] = bMatrixArr[0].sub(layerError[0].mul(lRate));
+		//System.out.println("Layer " + 0 + " weight changed: ");
+		//printMatrix(wMatrixArr[0].sub((layerError[0].mmul(x.transpose())).mul(lRate)));
+		//System.out.println("Layer " + 0 + " bias changed: ");
+		//printMatrix(bMatrixArr[0].sub(layerError[0].mul(lRate)));
 		for(int i=1;i<wMatrixArr.length;i++) {
 			wMatrixArr[i] = wMatrixArr[i].sub((layerError[i].mmul(activations[i-1].transpose())).mul(lRate));
+			//System.out.println((layerError[i].mmul(activations[i-1].transpose())));
+			//System.out.println(layerError[i]);
 			bMatrixArr[i] = bMatrixArr[i].sub(layerError[i].mul(lRate));
+			//System.out.println("Layer " + i + " weight changed: ");
+			//printMatrix(wMatrixArr[i].sub((layerError[i].mmul(activations[i-1].transpose())).mul(lRate)));
+			//System.out.println("Layer " + i + " bias changed: ");
+			//printMatrix(bMatrixArr[i].sub(layerError[i].mul(lRate)));
+			
+		}
+		boolean verbose = false;
+		if (verbose) {
+			System.out.println("Printing Nodes:");
+			for(int i=0;i<nodes.length;i++) {
+				System.out.println("Layer" + i);
+				printMatrix(nodes[i]);
+			}
+			System.out.println("Printing Activations:");
+			for(int i=0;i<nodes.length;i++) {
+				System.out.println("Layer" + i);
+				printMatrix(activations[i]);
+			}
+			System.out.println("Printing layerError:");
+			for(int i=0;i<nodes.length;i++) {
+				System.out.println("Layer" + i);
+				printMatrix(layerError[i]);
+			}
 		}
 	}
 	public void backPropGPU(DoubleMatrix x, DoubleMatrix y) {
@@ -92,11 +122,25 @@ public class Network {
 	public void setLearningRate(double lRate) {
 		this.lRate = lRate;
 	}
+	public void setWMatrix(DoubleMatrix[] m) {
+		this.wMatrixArr = m;
+	}
+	public void setBMatrix(DoubleMatrix[] m) {
+		this.bMatrixArr = m;
+	}
 	protected static void randomizeMatrix(DoubleMatrix m, double low, double high) {
 		for(int r=0;r<m.getRows();r++) {
 			for(int c=0;c<m.getColumns();c++) {
 				m.put(r,c,low+(Math.random()*(high-low)));
 			}
+		}
+	}
+	public static void printMatrix(DoubleMatrix m) {
+		for(int r=0;r<m.getRows();r++) {
+			for(int c=0;c<m.getColumns();c++) {
+				System.out.print(m.get(r, c) + " ");
+			}
+			System.out.println();
 		}
 	}
 }

@@ -9,10 +9,10 @@ public class TestNetwork {
 		 * network has 2 outputs, output 0 says input 0 is bigger and vice versa
 		 * network trained to test deciding which number is bigger or smaller
 		 */
-		int[] layers = new int[] {2,12,7,2};
+		int[] layers = new int[] {2,2560,2560,2};
 		Network n = new Network(layers, 0.05,new Sigmoid());
 		long startTime = System.nanoTime();
-		int numBackProps = 1000000;
+		int numBackProps = 50000;
 		for(int i=0;i<numBackProps;i++) {
 			DoubleMatrix x = DoubleMatrix.rand(2,1);
 			DoubleMatrix y = new DoubleMatrix(2,1);
@@ -22,6 +22,9 @@ public class TestNetwork {
 				y.put(0,0,1);
 			}
 			n.backProp(x, y);
+			if (i%100==0) {
+				System.out.println(100*(double)i/(double)numBackProps + "% complete");
+			}
 		}
 		long endTime = System.nanoTime();
 		long totalTime = endTime-startTime;
@@ -50,10 +53,10 @@ public class TestNetwork {
 			}
 		}
 		System.out.println("Percent Correct: " + 100*(double)numRight/(double)numTests + "%");
-		for(int i=0;i<n.wMatrixArr.length;i++) {
-			System.out.println(n.wMatrixArr[i]);
-			System.out.println(n.bMatrixArr[i]);
-		}
+		//for(int i=0;i<n.wMatrixArr.length;i++) {
+		//	System.out.println(n.wMatrixArr[i]);
+		//	System.out.println(n.bMatrixArr[i]);
+		//}
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter numbers to have neural network compare them:");
 		boolean repeat = true;
